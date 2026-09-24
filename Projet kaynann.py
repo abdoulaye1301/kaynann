@@ -122,7 +122,7 @@ def visualiser_donnees(base):
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         col[1].button("🔄 Actualiser les données")
-        col[2].button("Plus de détails", on_click=tableau_de_bord, args=(base,))
+        #col[2].button("Plus de détails", on_click=tableau_de_bord, args=(base,))
     else:
         col[0].download_button(
             label="📄 Télécharger les données",
