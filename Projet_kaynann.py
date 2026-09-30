@@ -176,7 +176,7 @@ def afrikaleyri(base):
     
     st.markdown(f"<h2 style='text-align: center;'>!---------- 📊 EVOLUTION DES RELANCES ----------!</h4><br>", unsafe_allow_html=True)
 
-    col= st.columns(5)
+    col= st.columns(6)
     # Injection de style CSS pour centrer le contenu du widget metric dans cette colonne spécifique
     col[0].markdown(
         """
@@ -228,6 +228,16 @@ def afrikaleyri(base):
         unsafe_allow_html=True
     )
     col[4].metric("SIMONE MANDIAME", (base["Agent"] == "SIMONE MANDIAME").sum())
+    col[5].markdown(
+            """
+            <style>[data-testid="stMetric"] {text-align: center;}
+            [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+            [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    col[5].metric("ROUGUIATOU DANFACA", (base["Agent"] == "ROUGUIATOU DANFACA").sum())
 
         # Représentation graphique avec plotly
 
