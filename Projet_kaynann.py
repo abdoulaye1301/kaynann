@@ -37,7 +37,8 @@ base1["Date"] = pd.to_datetime(donnee["_submission_time"])
 base1["Agent"] = donnee["_submitted_by"].apply(lambda x: "NGOULLE THIOUNE" if x== "ngoulle_thioune" 
                                                else ("FATOU BINTOU DIALLO" if x=="fatou_bintou_diallo" 
                                                      else ("ADJAB LUCIDE ALAINA" if x=="adjab_lucide_alaina" 
-                                                           else "SIMONE MANDIAME")))
+                                                           else ("ROUGUIATOU DANFACA" if x=="danfaca_rougui" 
+                                                                 else "SIMONE MANDIAME"))))
 nomscol=["Date","Agent","Nom de l'entreprise","Prenom & Nom répondant","Fonction du répondant",
         "Telephone répondant","Moyenne de Relance Effectuée", "Réaction globale",
         "Prix recommandez","Détails & Commentaires du prospect","Prochaine Action à Mener",
@@ -101,10 +102,6 @@ def kaynann(base):
         unsafe_allow_html=True
     )
     col[1].metric("Nombre de relances totales", base["Telephone répondant"].nunique())
-    #col[1].metric("NGOULLE THIOUNE", (base_kaynann["Agent"] == "Intéressée phase test").sum())
-    #col[2].metric("FATOU BINTOU DIALLO", (base_kaynann["Agent"] == "FATOU BINTOU DIALLO").sum())
-    #col[3].metric("ADJAB LUCIDE ALAINA", (base_kaynann["Agent"] == "ADJAB LUCIDE ALAINA").sum())
-    #col[4].metric("SIMONE MANDIAME", (base_kaynann["Agent"] == "SIMONE MANDIAME").sum())
 
       # Représentation graphique avec plotly
 
