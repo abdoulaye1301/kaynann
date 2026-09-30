@@ -187,7 +187,7 @@ def afrikaleyri(base):
         """,
         unsafe_allow_html=True
     )
-    col[0].metric("Nombre de relances totales", base["Telephone répondant"].nunique())
+    col[0].metric("Nbr de relances totales", base["Telephone répondant"].nunique())
     col[1].markdown(
         """
         <style>[data-testid="stMetric"] {text-align: center;}
