@@ -14,7 +14,7 @@ st.logo(profil)
 
 # --- Authentification simple ---
 #USER = "AFRIKA LEYRI"
-PASSWORD = "Afr"
+PASSWORD = "AFR"
 
 if "authentifie" not in st.session_state:
     st.session_state.authentifie = False
