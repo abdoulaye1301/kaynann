@@ -24,7 +24,7 @@ if "authentifie" not in st.session_state:
 page = st.sidebar.radio("📁 Menu de navigation", ["KAYNANN", "AFRIKA LEYRI"])
 # URL de récupération des données en CSV
 donnee = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/a3RSyGfABzRzmSL8qNVDg9/export-settings/esjBm7RAEkEEwJCzVDkgqZa/data.xlsx")
-
+#st.write(donnee.columns.to_list())
 
 # Charger la feuille sélectionnée
 nomscol1=["Nom de l'entreprise","Prenom & Nom répondant","Fonction du répondant",
@@ -33,7 +33,7 @@ nomscol1=["Nom de l'entreprise","Prenom & Nom répondant","Fonction du répondan
         "Date prévue pour la prochaine action"]
 # Définir les chemins des fichiers source et destination
 base1=donnee[nomscol1]
-base1["Date"] = pd.to_datetime(donnee["_submission_time"])
+base1["Date"] = pd.to_datetime(donnee["Date de la propection"])
 base1["Agent"] = donnee["_submitted_by"].apply(lambda x: "NGOULLE THIOUNE" if x== "ngoulle_thioune" 
                                                else ("FATOU BINTOU DIALLO" if x=="fatou_bintou_diallo" 
                                                      else ("ADJAB LUCIDE ALAINA" if x=="adjab_lucide_alaina" 
@@ -45,11 +45,23 @@ nomscol=["Date","Agent","Nom de l'entreprise","Prenom & Nom répondant","Fonctio
         "Date prévue pour la prochaine action"]
 base=base1[nomscol]
 
-# Définir les bornes du slider
 base["Date"] = base["Date"].dt.date
+# Définir les bornes du slider
+dates_valides = base["Date"].dropna()
+
+if dates_valides.empty:
+    st.error("Aucune date valide n'est disponible dans les données.")
+    st.stop()
+
+min_date = dates_valides.min()
+max_date = dates_valides.max()
+
+
+
+
 base_kaynann=base.drop(columns=["Agent"])
-min_date = min(base["Date"])
-max_date = max(base["Date"])
+#min_date = min(base["Date"])
+#max_date = max(base["Date"])
 
 
 def to_excel(df):
@@ -141,19 +153,29 @@ def kaynann(base):
     # Afficher les résultats
     
     st.markdown(f"<h3 style='text-align: center;'>!---------- Visualisation des données ----------!</h4><br>", unsafe_allow_html=True)
-    colonee= st.columns(3)
-    agent_filter = colonee[1].multiselect(
+    colonee= st.columns(4)
+    reaction_filter = colonee[1].multiselect(
             "Réaction du prospect",base["Réaction globale"].unique()
         )
-    # Appliquer le filtre par agent
-    if agent_filter:
-        base = base[base["Réaction globale"].isin(agent_filter)]
+    # Appliquer le filtre par Réaction du prospect
+    if reaction_filter:
+        base = base[base["Réaction globale"].isin(reaction_filter)]
+    
+    action_filter = colonee[2].multiselect(
+                "Prochaine Action à Mener",base["Prochaine Action à Mener"].unique()
+            )
+    # Appliquer le filtre par Prochaine Action à Mener
+    if action_filter:
+        base = base[base["Prochaine Action à Mener"].isin(action_filter)]
     
     st.dataframe(base.sort_values(by=["Date"], ascending=False))
 
         #col[2].button("Plus de détails", on_click=tableau_de_bord, args=(base,))
 # --- Fonction de tableau de bord ---
 def afrikaleyri(base):
+    
+    st.markdown(f"<h2 style='text-align: center;'>!---------- 📊 EVOLUTION DES RELANCES ----------!</h4><br>", unsafe_allow_html=True)
+    
     # Slider Streamlit pour filtrer une plage de dates
     colo=st.columns(2)
     start_date, end_date = colo[0].slider(
@@ -174,8 +196,6 @@ def afrikaleyri(base):
             # Agrégation par jour
     evolution = base.groupby("Date")
     
-    st.markdown(f"<h2 style='text-align: center;'>!---------- 📊 EVOLUTION DES RELANCES ----------!</h4><br>", unsafe_allow_html=True)
-
     col= st.columns(6)
     # Injection de style CSS pour centrer le contenu du widget metric dans cette colonne spécifique
     col[0].markdown(
@@ -276,13 +296,21 @@ def afrikaleyri(base):
     # Afficher les résultats
     
     st.markdown(f"<h3 style='text-align: center;'>!---------- Visualisation des données ----------!</h4><br>", unsafe_allow_html=True)
-    colonee= st.columns(3)
-    agent_filter = colonee[1].multiselect(
+    colonee= st.columns(4)
+    reaction_filter = colonee[1].multiselect(
             "Réaction du prospect",base["Réaction globale"].unique()
         )
-    # Appliquer le filtre par agent
-    if agent_filter:
-        base = base[base["Réaction globale"].isin(agent_filter)]
+    action_filter = colonee[2].multiselect(
+                    "Prochaine Action à Mener",base["Prochaine Action à Mener"].unique()
+                )
+    # Appliquer le filtre par Réaction du prospect
+    if reaction_filter:
+        base = base[base["Réaction globale"].isin(reaction_filter)]
+    
+    # Appliquer le filtre par Prochaine Action à Mener
+    if action_filter:
+        base = base[base["Prochaine Action à Mener"].isin(action_filter)]
+
     st.dataframe(base.sort_values(by=["Date","Agent"], ascending=False))
 
     # Téléchargement des données en format Excel
