@@ -4,6 +4,7 @@ from PIL import Image
 import plotly.express as px
 from openpyxl import load_workbook
 import io
+import textwrap
 
 st.set_page_config(
     page_title="AFRIKA LEYRI", layout="wide", page_icon="ndao abdoulaye.png"
@@ -112,7 +113,7 @@ def kaynann_b2c():
     )
     colo=col[1].columns(2)
     info=colo[0].selectbox(
-        "Inofrmation à renseigner",["Tous"] + donnee_B2C["Information à renseigner"].dropna().unique().tolist()
+        "Information mini-usine & utilisateur",["Tous"] + donnee_B2C["Information à renseigner"].dropna().unique().tolist()
     )
     zone=colo[1].selectbox(
             "Zone",["Tous"] + donnee_B2C["Zone"].dropna().unique().tolist()
@@ -155,6 +156,8 @@ def kaynann_b2c():
     if info!="Machine":
         colonne[1].metric("Nombre de personnes rencontrées", int(donnee_B2C_1["Nombre de personnes rencontré"].sum()))
     
+    #------------AFFICHAGE DES COLONNES DE TEXTE AVEC RETOUR A LA LIGNE----------------#
+    
     st.dataframe(
         donnee_B2C_1,
         column_config={
@@ -167,12 +170,21 @@ def kaynann_b2c():
                 "Photo pour la maintenance",
                 help="Photo prise lors du diagnostic pour la maintenance",
                 width="medium"
-            )
+            ),
+            "Difficultés rencontrés": st.column_config.TextColumn(
+                            "Difficultés rencontrés",
+                            width="large"
+                        ),
+                        "Recommandations": st.column_config.TextColumn(
+                            "Recommandations",
+                            width="large"
+                        )
         },
         hide_index=True,
         use_container_width=True
-)
-
+    )
+    # ==========================================#
+    
 def to_excel(df):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
