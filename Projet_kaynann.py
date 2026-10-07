@@ -21,8 +21,9 @@ if "authentifie" not in st.session_state:
 
   
     # --- Navigation ---
-page = st.sidebar.radio("📁 Menu de navigation", ["KAYNANN", "AFRIKA LEYRI"])
-# URL de récupération des données en CSV
+page = st.sidebar.selectbox("📁 Menu de navigation", ["KAYNANN", "AFRIKA LEYRI"])
+
+# URL de récupération des données B2B
 donnee = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/a3RSyGfABzRzmSL8qNVDg9/export-settings/esjBm7RAEkEEwJCzVDkgqZa/data.xlsx")
 #st.write(donnee.columns.to_list())
 
@@ -63,14 +64,7 @@ base_kaynann=base.drop(columns=["Agent"])
 #min_date = min(base["Date"])
 #max_date = max(base["Date"])
 
-
-def to_excel(df):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name='Données')
-    output.seek(0)
-    return output
-
+# =======================CONNEXION=====================================#
 def login():
     #st.sidebar.title("🔐 Connexion")
     with st.sidebar.form("login_form"):
@@ -85,10 +79,113 @@ def login():
                 st.error("❌ Identifiants incorrects")
                 st.warning("Veuillez vous connecter pour accéder aux données.")
                 st.stop()
+# ========================B2C====================================#
+def kaynann_b2c():
+    
+    st.markdown(f"<h2 style='text-align: center;'>!---------- 📊 RAPPORT TERRAIN COMMERCIAL ----------!</h4><br>", unsafe_allow_html=True)
+        
+    # URL de récupération des données B2C
+    donnee_muni_usine = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/aWPJ3oxcYAQyuz94napK8F/export-settings/esxgJ3dtGxH6oAsC8ToDFcj/data.xlsx")
+    #st.write(donnee_muni_usine.columns.to_list())
+    #st.write(donnee_muni_usine.head())
+    colonee_B2C=["Groupe","N° Muni-usine","Information à renseigner","Type utilisateur","Precisez","Consommation d'eau (en litre)"
+    ,"Difficultés rencontrés","Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène"
+    ,"Photo hygiène_URL","Recommandations","Nombre de personnes rencontré"]
+    donnee_B2C=donnee_muni_usine[colonee_B2C]
+    donnee_B2C["Début"] = donnee_muni_usine["start"].dt.time
+    donnee_B2C["Fin"] = donnee_muni_usine["end"].dt.time
+    donnee_B2C["Date"] = donnee_muni_usine["today"].dt.date
+    donnee_B2C["Zone"] = donnee_muni_usine["username"].apply(lambda x: "RUFISQUE" if x== "aissatou__diouf" else "PARCELLES")
+    donnee_B2C["Agent"] = donnee_muni_usine["username"].apply(lambda x: "AISSATOU DIOUF" if x== "aissatou__diouf" else "DAOUDA DIOUF")
+
+   
+    min_date_b2c = donnee_B2C["Date"].min()
+    max_date_b2c = donnee_B2C["Date"].max()
+    col= st.columns(2)
+        # Slider Streamlit pour filtrer une plage de dates
+    start_date_b2c, end_date_b2c = col[0].slider(
+        "Sélectionnez une plage de dates",
+        min_value=min_date_b2c,
+        max_value=max_date_b2c,
+        value=(min_date_b2c, max_date_b2c),  # valeur par défaut (tout)
+        format="DD/MM/YYYY"
+    )
+    colo=col[1].columns(2)
+    info=colo[0].selectbox(
+        "Inofrmation à renseigner",["Tous"] + donnee_B2C["Information à renseigner"].dropna().unique().tolist()
+    )
+    zone=colo[1].selectbox(
+            "Zone",["Tous"] + donnee_B2C["Zone"].dropna().unique().tolist()
+        )
+    if info=="Machine":
+        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Consommation d'eau (en litre)",
+                     "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL"]
+    elif info=="Utilisateur":
+        nomscol_B2C=["Date","Début","Fin","Zone","Agent","N° Muni-usine",
+                     "Type utilisateur","Precisez","Nombre de personnes rencontré","Difficultés rencontrés",
+                     "Recommandations"]
+    else:
+        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Information à renseigner",
+                     "Type utilisateur","Precisez","Consommation d'eau (en litre)",
+                     "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL",
+                     "Nombre de personnes rencontré","Difficultés rencontrés",
+                     "Recommandations"]
+    # Filtrer les données selon la plage sélectionnée
+    if info != "Tous" and zone != "Tous":
+        donnee_B2C = donnee_B2C[(donnee_B2C["Information à renseigner"] == info) & (donnee_B2C["Zone"] == zone) & (donnee_B2C["Date"] >= start_date_b2c) & (donnee_B2C["Date"] <= end_date_b2c)]
+    elif info != "Tous":
+        donnee_B2C = donnee_B2C[(donnee_B2C["Information à renseigner"] == info) & (donnee_B2C["Date"] >= start_date_b2c) & (donnee_B2C["Date"] <= end_date_b2c)]
+    elif zone != "Tous":
+        donnee_B2C = donnee_B2C[(donnee_B2C["Zone"] == zone) & (donnee_B2C["Date"] >= start_date_b2c) & (donnee_B2C["Date"] <= end_date_b2c)]
+    else:
+        donnee_B2C = donnee_B2C[(donnee_B2C["Date"] >= start_date_b2c) & (donnee_B2C["Date"] <= end_date_b2c)]
+    # Affichage du tableau avec les photos
+    donnee_B2C_1=donnee_B2C[nomscol_B2C]
+     # Injection de style CSS pour centrer le contenu du widget metric dans cette colonne spécifique
+    colonne= st.columns(2)
+    colonne[1].markdown(
+        """
+        <style>[data-testid="stMetric"] {text-align: center;}
+        [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+        [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    if info!="Machine":
+        colonne[1].metric("Nombre de personnes rencontrées", int(donnee_B2C_1["Nombre de personnes rencontré"].sum()))
+    
+    st.dataframe(
+        donnee_B2C_1,
+        column_config={
+            "Photo hygiène_URL": st.column_config.ImageColumn(
+                "Photo pour l'hygiène",
+                help="Photo prise lors du diagnostic pour l'hygiène",
+                width="medium"
+            ),
+            "Photo maintenance_URL": st.column_config.ImageColumn(
+                "Photo pour la maintenance",
+                help="Photo prise lors du diagnostic pour la maintenance",
+                width="medium"
+            )
+        },
+        hide_index=True,
+        use_container_width=True
+)
+
+def to_excel(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Données')
+    output.seek(0)
+    return output
+
+
+# ======================B2B======================================#
 # --- Onction de vuisualisation des données ---
 
 def kaynann(base):
-    
+   
     st.markdown(f"<h2 style='text-align: center;'>!---------- 📊 EVOLUTION DES RELANCES ----------!</h4><br>", unsafe_allow_html=True)
     col= st.columns(2)
     # Slider Streamlit pour filtrer une plage de dates
@@ -115,7 +212,7 @@ def kaynann(base):
     )
     col[1].metric("Nombre de relances totales", base["Telephone répondant"].nunique())
 
-      # Représentation graphique avec plotly
+    # Représentation graphique avec plotly
 
     #colon = st.columns(1)
     pa = base.groupby("Réaction globale").size().reset_index(name="Nombre de Prospects")
@@ -131,8 +228,8 @@ def kaynann(base):
     # Centrer le titre du graphique (title_x=0.5)
     gra.update_layout(title_x=0.5)
     gra.update_traces(texttemplate='%{y}', 
-                      textposition='auto',
-                      textfont_size=16)
+                    textposition='auto',
+                    textfont_size=16)
     gra.update_layout(
         xaxis_title="Réaction",
         yaxis_title="Nombre de Prospects",
@@ -169,7 +266,7 @@ def kaynann(base):
         base = base[base["Prochaine Action à Mener"].isin(action_filter)]
     
     st.dataframe(base.sort_values(by=["Date"], ascending=False))
-
+    
         #col[2].button("Plus de détails", on_click=tableau_de_bord, args=(base,))
 # --- Fonction de tableau de bord ---
 def afrikaleyri(base):
@@ -337,7 +434,13 @@ def afrikaleyri(base):
   
 # --- Page 1 : KAYNANN ---
 if page == "KAYNANN":
-    kaynann(base_kaynann)  
+    sectio= st.sidebar.radio(
+            "Équipe",("B2B", "B2C")
+        )
+    if sectio == "B2B":
+        kaynann(base_kaynann)  
+    elif sectio == "B2C":
+        kaynann_b2c()
 
 # --- Page 2 : Tableau de bord (protégé) ---
 elif page == "AFRIKA LEYRI":
@@ -346,6 +449,18 @@ elif page == "AFRIKA LEYRI":
         st.warning("Veuillez vous connecter pour accéder aux données.")
         login()
         if st.session_state.authentifie:
-            afrikaleyri(base)
+            sectio= st.sidebar.radio(
+                    "Équipe",("B2B", "B2C")
+                )
+            if sectio == "B2B":
+                afrikaleyri(base)
+            else:
+                kaynann_b2c()
     else:
-        afrikaleyri(base)
+        sectio= st.sidebar.radio(
+                "Équipe",("B2B", "B2C")
+            )
+        if sectio == "B2B":
+            afrikaleyri(base)
+        else:
+            kaynann_b2c()
