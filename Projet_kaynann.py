@@ -155,34 +155,34 @@ def kaynann_b2c():
     )
     if info!="Machine":
         colonne[1].metric("Nombre de personnes rencontrées", int(donnee_B2C_1["Nombre de personnes rencontré"].sum()))
-    if info!="Machine":
+    #if info!="Machine":
         #colon = st.columns(1)
-        pa_b2c = donnee_B2C_1.groupby("Type utilisateur").size().reset_index(name="Nombre de personnes rencontré")
+     #   pa_b2c = donnee_B2C_1.groupby("Type utilisateur").size().reset_index(name="Nombre de personnes rencontré")
 
         # Utilisation de px.bar au lieu de px.histogram et passage de y="Nombre de Prospects"
-        gra_b2c = px.bar(
-            pa_b2c, 
-            x="Type utilisateur", 
-            y="Nombre de personnes rencontré",
-            title="LES PERSONNES RENCONTRÉS",
-            color="Type utilisateur"
-        )
+      #  gra_b2c = px.bar(
+       #     pa_b2c, 
+        #    x="Type utilisateur", 
+         #   y="Nombre de personnes rencontré",
+          #  title="LES PERSONNES RENCONTRÉS",
+           # color="Type utilisateur"
+       # )
         # Centrer le titre du graphique (title_x=0.5)
-        gra_b2c.update_layout(title_x=0.5)
-        gra_b2c.update_traces(texttemplate='%{y}', 
-                            textposition='auto',
-                            textfont_size=16)
-        gra_b2c.update_layout(
-            xaxis_title="Utilisateur",
-            yaxis_title="Nombre de personnes rencontré",
-            showlegend=False,
-            yaxis=dict(
-            showticklabels=False,  # Cache les chiffres de l'axe Y
-            title=None             # Supprime le titre de l'axe Y ("Nombre de personnes rencontré")
-        )
-        )
+        #gra_b2c.update_layout(title_x=0.5)
+        #gra_b2c.update_traces(texttemplate='%{y}', 
+         #                   textposition='auto',
+          #                  textfont_size=16)
+        #gra_b2c.update_layout(
+         #   xaxis_title="Utilisateur",
+          #  yaxis_title="Nombre de personnes rencontré",
+           # showlegend=False,
+            #yaxis=dict(
+            #showticklabels=False,  # Cache les chiffres de l'axe Y
+            #title=None             # Supprime le titre de l'axe Y ("Nombre de personnes rencontré")
+        #)
+        #)
 
-        st.plotly_chart(gra_b2c, use_container_width=True)
+        #st.plotly_chart(gra_b2c, use_container_width=True)
         #------------AFFICHAGE DES COLONNES DE TEXTE AVEC RETOUR A LA LIGNE----------------#
     
     st.dataframe(
