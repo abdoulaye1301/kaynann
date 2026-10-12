@@ -89,7 +89,7 @@ def kaynann_b2c():
     donnee_muni_usine = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/aWPJ3oxcYAQyuz94napK8F/export-settings/esxgJ3dtGxH6oAsC8ToDFcj/data.xlsx")
     #st.write(donnee_muni_usine.columns.to_list())
     #st.write(donnee_muni_usine.head())
-    colonee_B2C=["Groupe","N° Muni-usine","Information à renseigner","Type utilisateur","Precisez","Consommation d'eau (en litre)"
+    colonee_B2C=["Groupe","N° Muni-usine","Information à renseigner","Type utilisateur","Consommation d'eau (en litre)"
     ,"Difficultés rencontrés","Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène"
     ,"Photo hygiène_URL","Recommandations","Nombre de personnes rencontré"]
     donnee_B2C=donnee_muni_usine[colonee_B2C]
@@ -123,11 +123,11 @@ def kaynann_b2c():
                      "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL"]
     elif info=="Utilisateur":
         nomscol_B2C=["Date","Début","Fin","Zone","Agent","N° Muni-usine",
-                     "Type utilisateur","Precisez","Nombre de personnes rencontré","Difficultés rencontrés",
+                     "Type utilisateur","Nombre de personnes rencontré","Difficultés rencontrés",
                      "Recommandations"]
-    else:
+    else: 
         nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Information à renseigner",
-                     "Type utilisateur","Precisez","Consommation d'eau (en litre)",
+                     "Type utilisateur","Consommation d'eau (en litre)",
                      "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL",
                      "Nombre de personnes rencontré","Difficultés rencontrés",
                      "Recommandations"]
