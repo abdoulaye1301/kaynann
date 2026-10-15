@@ -26,7 +26,7 @@ page = st.sidebar.selectbox("📁 Menu de navigation", ["KAYNANN", "AFRIKA LEYRI
 
 # URL de récupération des données B2B
 donnee = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/a3RSyGfABzRzmSL8qNVDg9/export-settings/esjBm7RAEkEEwJCzVDkgqZa/data.xlsx")
-st.write(donnee.columns.to_list())
+#st.write(donnee.columns.to_list())
 
 # Charger la feuille sélectionnée
 nomscol1=["Nom de l'entreprise","Precisez","Prenom & Nom répondant","Fonction du répondant",
@@ -458,6 +458,12 @@ def afrikaleyri(base):
     if action_filter:
         base = base[base["Prochaine Action à Mener"].isin(action_filter)]
 
+    action_filter = colonee[3].multiselect(
+                    "Nom de l'entreprise",base["Nom de l'entreprise"].unique()
+                )
+    # Appliquer le filtre par Nom de l'entreprise
+    if action_filter:
+        base = base[base["Nom de l'entreprise"].isin(action_filter)]
     st.dataframe(base.sort_values(by=["Date","Agent"], ascending=False))
 
     # Téléchargement des données en format Excel
