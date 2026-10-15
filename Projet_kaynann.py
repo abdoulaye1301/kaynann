@@ -26,10 +26,10 @@ page = st.sidebar.selectbox("📁 Menu de navigation", ["KAYNANN", "AFRIKA LEYRI
 
 # URL de récupération des données B2B
 donnee = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/a3RSyGfABzRzmSL8qNVDg9/export-settings/esjBm7RAEkEEwJCzVDkgqZa/data.xlsx")
-#st.write(donnee.columns.to_list())
+st.write(donnee.columns.to_list())
 
 # Charger la feuille sélectionnée
-nomscol1=["Nom de l'entreprise","Prenom & Nom répondant","Fonction du répondant",
+nomscol1=["Nom de l'entreprise","Precisez","Prenom & Nom répondant","Fonction du répondant",
         "Telephone répondant","Moyenne de Relance Effectuée", "Réaction globale",
         "Prix recommandez","Détails & Commentaires du prospect","Prochaine Action à Mener",
         "Date prévue pour la prochaine action"]
@@ -41,7 +41,7 @@ base1["Agent"] = donnee["_submitted_by"].apply(lambda x: "NGOULLE THIOUNE" if x=
                                                      else ("ADJAB LUCIDE ALAINA" if x=="adjab_lucide_alaina" 
                                                            else ("ROUGUIATOU DANFACA" if x=="danfaca_rougui" 
                                                                  else "SIMONE MANDIAME"))))
-nomscol=["Date","Agent","Nom de l'entreprise","Prenom & Nom répondant","Fonction du répondant",
+nomscol=["Date","Agent","Nom de l'entreprise","Precisez","Prenom & Nom répondant","Fonction du répondant",
         "Telephone répondant","Moyenne de Relance Effectuée", "Réaction globale",
         "Prix recommandez","Détails & Commentaires du prospect","Prochaine Action à Mener",
         "Date prévue pour la prochaine action"]
@@ -307,7 +307,14 @@ def kaynann(base):
     # Appliquer le filtre par Prochaine Action à Mener
     if action_filter:
         base = base[base["Prochaine Action à Mener"].isin(action_filter)]
-    
+
+    action_filter = colonee[3].multiselect(
+                    "Nom de l'entreprise",base["Nom de l'entreprise"].unique()
+                )
+    # Appliquer le filtre par Nom de l'entreprise
+    if action_filter:
+        base = base[base["Nom de l'entreprise"].isin(action_filter)]
+
     st.dataframe(base.sort_values(by=["Date"], ascending=False))
     
         #col[2].button("Plus de détails", on_click=tableau_de_bord, args=(base,))
