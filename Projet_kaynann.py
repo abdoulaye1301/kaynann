@@ -89,7 +89,7 @@ def kaynann_b2c():
     donnee_muni_usine = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/aWPJ3oxcYAQyuz94napK8F/export-settings/esxgJ3dtGxH6oAsC8ToDFcj/data.xlsx")
     #st.write(donnee_muni_usine.columns.to_list())
     #st.write(donnee_muni_usine.head())
-    colonee_B2C=["Groupe","N° Muni-usine","Information à renseigner","Type utilisateur","Consommation d'eau (en litre)"
+    colonee_B2C=["Groupe","N° Muni-usine","Information à renseigner","Type utilisateur","Quantité vendue","Consommation d'eau (en litre)"
     ,"Difficultés rencontrés","Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène"
     ,"Photo hygiène_URL","Recommandations","Nombre de personnes rencontré"]
     donnee_B2C=donnee_muni_usine[colonee_B2C]
@@ -118,8 +118,12 @@ def kaynann_b2c():
     zone=colo[1].selectbox(
             "Zone",["Tous"] + donnee_B2C["Zone"].dropna().unique().tolist()
         )
+    Numero_muni_usine=donnee_B2C["N° Muni-usine"].dropna().unique().tolist()
+    #=========donnee calcul conso===============
+    nomscol_B2C_cons=["Date","Zone","Agent","Groupe","N° Muni-usine","Quantité vendue","Consommation d'eau (en litre)"]
+    
     if info=="Machine":
-        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Consommation d'eau (en litre)",
+        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Quantité vendue","Consommation d'eau (en litre)",
                      "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL"]
     elif info=="Utilisateur":
         nomscol_B2C=["Date","Début","Fin","Zone","Agent","N° Muni-usine",
@@ -127,7 +131,7 @@ def kaynann_b2c():
                      "Recommandations"]
     else: 
         nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Information à renseigner",
-                     "Type utilisateur","Consommation d'eau (en litre)",
+                     "Type utilisateur","Quantité vendue","Consommation d'eau (en litre)",
                      "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL",
                      "Nombre de personnes rencontré","Difficultés rencontrés",
                      "Recommandations"]
@@ -142,6 +146,14 @@ def kaynann_b2c():
         donnee_B2C = donnee_B2C[(donnee_B2C["Date"] >= start_date_b2c) & (donnee_B2C["Date"] <= end_date_b2c)]
     # Affichage du tableau avec les photos
     donnee_B2C_1=donnee_B2C[nomscol_B2C]
+
+    if info!="Utilisateur":
+        nonnee_cons=donnee_B2C[nomscol_B2C_cons]
+        # Convertir la consommation en valeur numérique
+        nonnee_cons["Consommation d'eau (en litre)"] = pd.to_numeric(
+            nonnee_cons["Consommation d'eau (en litre)"],
+            errors="coerce"
+        )
      # Injection de style CSS pour centrer le contenu du widget metric dans cette colonne spécifique
     colonne= st.columns(2)
     colonne[1].markdown(
@@ -153,8 +165,107 @@ def kaynann_b2c():
         """,
         unsafe_allow_html=True
     )
+    
     if info!="Machine":
         colonne[1].metric("Nombre de personnes rencontrées", int(donnee_B2C_1["Nombre de personnes rencontré"].sum()))
+    
+    #===============================VOLUME DE LITRES D'EAU CONSOMMÉS PAR LES MINI-USINES========================#
+    colonne_quantite= st.columns(2)
+
+    #===============================VOLUME DE LITRES D'EAU CONSOMMÉS PAR LES MINI-USINES========================#
+    if info!="Utilisateur":
+        #colonne_quantite[0].markdown(f"<h5 style='text-align: center;'>QUANTITE D'EAU VENDU (EN LITRE)</h5><br>", unsafe_allow_html=True)
+        
+        donnee_agre = (
+            nonnee_cons.groupby(["Zone","N° Muni-usine"])
+            .agg({"Quantité vendue": "sum"})
+            .reset_index()
+        )
+        donnee_ordre = donnee_agre.sort_values(by=["Zone","Quantité vendue"], ascending=False)
+        donnee_calcu=donnee_ordre.copy()
+        #donnee_ordre = donnee_ordre[donnee_ordre["Quantité vendue"] > 0]
+        #colonne_quantite[0].write(donnee_ordre)
+
+
+        #===========================COSOMATION CALCULER AVEC LA VOLUME==============================#
+
+        colonne_quantite[0].markdown(f"<h5 style='text-align: center;'>QUANTITE D'EAU VENDUE & DEDUITE</h5><br>", unsafe_allow_html=True)
+            
+
+        donne_cal1 = nonnee_cons[
+            pd.to_numeric(
+                nonnee_cons["Consommation d'eau (en litre)"],
+                errors="coerce"
+            ).notna()
+        ].copy()
+
+        # Convertir les colonnes
+        donne_cal1["Consommation d'eau (en litre)"] = pd.to_numeric(
+            donne_cal1["Consommation d'eau (en litre)"],
+            errors="coerce"
+        )
+
+        donne_cal1["Date"] = pd.to_datetime(
+            donne_cal1["Date"], errors="coerce"
+        )
+
+        # Filtrer les muni-usines et la période sélectionnée
+        donne_cal1 = donne_cal1[
+            donne_cal1["N° Muni-usine"].isin(Numero_muni_usine)
+            & (donne_cal1["Date"] >= pd.to_datetime(start_date_b2c))
+            & (donne_cal1["Date"] <= pd.to_datetime(end_date_b2c))
+        ].copy()
+
+        # Trier les relevés par muni-usine et par date
+        donne_cal1 = donne_cal1.sort_values(
+            ["N° Muni-usine", "Date"]
+        )
+
+        # Récupérer le premier et le dernier relevé de chaque muni-usine
+        premier_releve = donne_cal1.drop_duplicates(
+            subset=["N° Muni-usine"],
+            keep="first"
+        ).set_index("N° Muni-usine")["Consommation d'eau (en litre)"]
+
+        dernier_releve = donne_cal1.drop_duplicates(
+            subset=["N° Muni-usine"],
+            keep="last"
+        ).set_index("N° Muni-usine")["Consommation d'eau (en litre)"]
+
+        # Calculer le volume consommé pour chaque muni-usine
+        volume = dernier_releve.subtract(premier_releve)
+
+        # Affecter le résultat au numéro de muni-usine correspondant
+        donnee_calcu["Volume initiale"] = (
+                    donnee_calcu["N° Muni-usine"].map(premier_releve)
+                )
+        
+        donnee_calcu["Volume finale"] = (
+            donnee_calcu["N° Muni-usine"].map(dernier_releve)
+        )
+        donnee_calcu["Volume déduite"] = (
+                    donnee_calcu["N° Muni-usine"].map(volume)
+                )
+
+        donnee_calcu = donnee_calcu[
+            (donnee_calcu["Volume déduite"].fillna(0) != 0)
+            | (donnee_calcu["Quantité vendue"].fillna(0) != 0)
+        ]
+        # Afficher le résultat
+        colonne_quantite[0].write(donnee_calcu)
+
+
+        #============GRAPHIQUE DU VOLUME DE LITRES D'EAU CONSOMMÉS PAR LES MINI-USINES========================#
+        #gra_quantite = px.bar(
+         #   donnee_ordre,
+          #  x="N° Muni-usine",
+           # y="Quantité vendue",
+            #title="VOLUME DE LITRES D'EAU VENDUS",
+            #color="Zone"
+        #)
+        #gra_quantite.update_layout(title_x=0.5)
+        #st.plotly_chart(gra_quantite, use_container_width=True)
+    #===============================NOMBRE DE PERSONNES RENCONTRÉES PAR TYPE D'UTILISATEUR========================#
     if info!="Machine":
         #colon = st.columns(1)
         pa_b2c = (
@@ -186,7 +297,7 @@ def kaynann_b2c():
         )
         )
 
-        st.plotly_chart(gra_b2c, use_container_width=True)
+        colonne_quantite[1].plotly_chart(gra_b2c, use_container_width=True)
         #------------AFFICHAGE DES COLONNES DE TEXTE AVEC RETOUR A LA LIGNE----------------#
     
     st.dataframe(
