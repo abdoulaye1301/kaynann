@@ -89,7 +89,7 @@ def kaynann_b2c():
     donnee_muni_usine = pd.read_excel(f"https://kf.kobotoolbox.org/api/v2/assets/aWPJ3oxcYAQyuz94napK8F/export-settings/esxgJ3dtGxH6oAsC8ToDFcj/data.xlsx")
     #st.write(donnee_muni_usine.columns.to_list())
     #st.write(donnee_muni_usine.head())
-    colonee_B2C=["Groupe","N° Muni-usine","Information à renseigner","Type utilisateur","Quantité vendue","Consommation d'eau (en litre)"
+    colonee_B2C=["Groupe","N° Muni-usine","Precisez le N° Muni-usine","Information à renseigner","Type utilisateur","Quantité vendue","Consommation d'eau (en litre)"
     ,"Difficultés rencontrés","Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène"
     ,"Photo hygiène_URL","Recommandations","Nombre de personnes rencontré"]
     donnee_B2C=donnee_muni_usine[colonee_B2C]
@@ -123,14 +123,14 @@ def kaynann_b2c():
     nomscol_B2C_cons=["Date","Zone","Agent","Groupe","N° Muni-usine","Quantité vendue","Consommation d'eau (en litre)"]
     
     if info=="Machine":
-        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Quantité vendue","Consommation d'eau (en litre)",
+        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Precisez le N° Muni-usine","Quantité vendue","Consommation d'eau (en litre)",
                      "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL"]
     elif info=="Utilisateur":
-        nomscol_B2C=["Date","Début","Fin","Zone","Agent","N° Muni-usine",
+        nomscol_B2C=["Date","Début","Fin","Zone","Agent","N° Muni-usine","Precisez le N° Muni-usine",
                      "Type utilisateur","Nombre de personnes rencontré","Difficultés rencontrés",
                      "Recommandations"]
     else: 
-        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Information à renseigner",
+        nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Precisez le N° Muni-usine","Information à renseigner",
                      "Type utilisateur","Quantité vendue","Consommation d'eau (en litre)",
                      "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL",
                      "Nombre de personnes rencontré","Difficultés rencontrés",
@@ -155,19 +155,46 @@ def kaynann_b2c():
             errors="coerce"
         )
      # Injection de style CSS pour centrer le contenu du widget metric dans cette colonne spécifique
-    colonne= st.columns(2)
+    colonne= st.columns(3)
+    colonne[0].markdown(
+            """
+            <style>[data-testid="stMetric"] {text-align: center;}
+            [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+            [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
     colonne[1].markdown(
-        """
-        <style>[data-testid="stMetric"] {text-align: center;}
-        [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
-        [data-testid="stMetricValue"] {display: flex;justify-content: center;}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    
+            """
+            <style>[data-testid="stMetric"] {text-align: center;}
+            [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+            [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+    if info == "Utilisateur":
+        donnee_B2C_2=donnee_B2C[nomscol_B2C_cons]
+        colonne[0].metric("Quantité vendue Parcelles", int(donnee_B2C_2[donnee_B2C_2["Zone"]=="PARCELLES"]["Quantité vendue"].sum()))
+        
+        colonne[1].metric("Quantité vendue Rufisque", int(donnee_B2C_2[donnee_B2C_2["Zone"]=="RUFISQUE"]["Quantité vendue"].sum()))
+    else:
+        colonne[0].metric("Quantité vendue Parcelles", int(donnee_B2C_1[donnee_B2C_1["Zone"]=="PARCELLES"]["Quantité vendue"].sum()))
+                
+        colonne[1].metric("Quantité vendue Rufisque", int(donnee_B2C_1[donnee_B2C_1["Zone"]=="RUFISQUE"]["Quantité vendue"].sum()))
+           
     if info!="Machine":
-        colonne[1].metric("Nombre de personnes rencontrées", int(donnee_B2C_1["Nombre de personnes rencontré"].sum()))
+        colonne[2].markdown(
+                    """
+                    <style>[data-testid="stMetric"] {text-align: center;}
+                    [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+                    [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
+        colonne[2].metric("Nombre de personnes rencontrées", int(donnee_B2C_1["Nombre de personnes rencontré"].sum()))
     
     #===============================VOLUME DE LITRES D'EAU CONSOMMÉS PAR LES MINI-USINES========================#
     colonne_quantite= st.columns(2)
