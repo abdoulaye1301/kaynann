@@ -156,32 +156,51 @@ def kaynann_b2c():
         )
      # Injection de style CSS pour centrer le contenu du widget metric dans cette colonne spécifique
     colonne= st.columns(3)
-    colonne[0].markdown(
-            """
-            <style>[data-testid="stMetric"] {text-align: center;}
-            [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
-            [data-testid="stMetricValue"] {display: flex;justify-content: center;}
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-    colonne[1].markdown(
-            """
-            <style>[data-testid="stMetric"] {text-align: center;}
-            [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
-            [data-testid="stMetricValue"] {display: flex;justify-content: center;}
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+    
     if info == "Utilisateur":
         donnee_B2C_2=donnee_B2C[nomscol_B2C_cons]
+        colonne[0].markdown(
+                    """
+                    <style>[data-testid="stMetric"] {text-align: center;}
+                    [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+                    [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
         colonne[0].metric("Quantité vendue Parcelles", int(donnee_B2C_2[donnee_B2C_2["Zone"]=="PARCELLES"]["Quantité vendue"].sum()))
         
+        colonne[1].markdown(
+                """
+                <style>[data-testid="stMetric"] {text-align: center;}
+                [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+                [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
         colonne[1].metric("Quantité vendue Rufisque", int(donnee_B2C_2[donnee_B2C_2["Zone"]=="RUFISQUE"]["Quantité vendue"].sum()))
     else:
+        colonne[0].markdown(
+                    """
+                    <style>[data-testid="stMetric"] {text-align: center;}
+                    [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+                    [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
         colonne[0].metric("Quantité vendue Parcelles", int(donnee_B2C_1[donnee_B2C_1["Zone"]=="PARCELLES"]["Quantité vendue"].sum()))
                 
+        colonne[1].markdown(
+                """
+                <style>[data-testid="stMetric"] {text-align: center;}
+                [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+                [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
         colonne[1].metric("Quantité vendue Rufisque", int(donnee_B2C_1[donnee_B2C_1["Zone"]=="RUFISQUE"]["Quantité vendue"].sum()))
            
     if info!="Machine":
@@ -278,6 +297,31 @@ def kaynann_b2c():
             (donnee_calcu["Volume déduite"].fillna(0) != 0)
             | (donnee_calcu["Quantité vendue"].fillna(0) != 0)
         ]
+
+
+        colonne[0].markdown(
+                    """
+                    <style>[data-testid="stMetric"] {text-align: center;}
+                    [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+                    [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
+        colonne[0].metric("Quantité relevée Parcelles", int(donnee_calcu[donnee_calcu["Zone"]=="PARCELLES"]["Quantité vendue"].sum()))
+                
+        colonne[1].markdown(
+                """
+                <style>[data-testid="stMetric"] {text-align: center;}
+                [data-testid="stMetricLabel"] {display: flex;justify-content: center;}
+                [data-testid="stMetricValue"] {display: flex;justify-content: center;}
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
+        colonne[1].metric("Quantité relevée Rufisque", int(donnee_calcu[donnee_calcu["Zone"]=="RUFISQUE"]["Quantité vendue"].sum()))
+            
+
         # Afficher le résultat
         colonne_quantite[0].write(donnee_calcu)
 
