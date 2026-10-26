@@ -90,18 +90,21 @@ def kaynann_b2c():
     #st.write(donnee_muni_usine.columns.to_list())
     #st.write(donnee_muni_usine.head())
     colonee_B2C=["Groupe","N° Muni-usine","Precisez le N° Muni-usine","Information à renseigner","Type utilisateur","Quantité vendue","Consommation d'eau (en litre)"
-    ,"Difficultés rencontrés","Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène"
+    ,"Difficultés rencontrés","Autre(s) difficulté(s)","Diagnostic maintenance","Autre diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Autre diagnostic hygiène"
     ,"Photo hygiène_URL","Recommandations","Nombre de personnes rencontré"]
     donnee_B2C=donnee_muni_usine[colonee_B2C]
     donnee_B2C["Début"] = donnee_muni_usine["start"].dt.time
     donnee_B2C["Fin"] = donnee_muni_usine["end"].dt.time
-    donnee_B2C["Date"] = donnee_muni_usine["today"].dt.date
+    donnee_B2C["Date"] = donnee_muni_usine["Date de la propection"].dt.date
     donnee_B2C["Zone"] = donnee_muni_usine["username"].apply(lambda x: "RUFISQUE" if x== "aissatou__diouf" else "PARCELLES")
     donnee_B2C["Agent"] = donnee_muni_usine["username"].apply(lambda x: "AISSATOU DIOUF" if x== "aissatou__diouf" else "DAOUDA DIOUF")
 
+
+    # Supprimer les dates invalides
+    dates_valides1 = donnee_B2C["Date"].dropna()
    
-    min_date_b2c = donnee_B2C["Date"].min()
-    max_date_b2c = donnee_B2C["Date"].max()
+    min_date_b2c = dates_valides1.min()
+    max_date_b2c = dates_valides1.max()
     col= st.columns(2)
         # Slider Streamlit pour filtrer une plage de dates
     start_date_b2c, end_date_b2c = col[0].slider(
@@ -124,16 +127,16 @@ def kaynann_b2c():
     
     if info=="Machine":
         nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Precisez le N° Muni-usine","Quantité vendue","Consommation d'eau (en litre)",
-                     "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL"]
+                     "Diagnostic maintenance","Autre diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Autre diagnostic hygiène","Photo hygiène_URL"]
     elif info=="Utilisateur":
         nomscol_B2C=["Date","Début","Fin","Zone","Agent","N° Muni-usine","Precisez le N° Muni-usine",
-                     "Type utilisateur","Nombre de personnes rencontré","Difficultés rencontrés",
+                     "Type utilisateur","Nombre de personnes rencontré","Difficultés rencontrés","Autre(s) difficulté(s)",
                      "Recommandations"]
     else: 
         nomscol_B2C=["Date","Début","Fin","Zone","Agent","Groupe","N° Muni-usine","Precisez le N° Muni-usine","Information à renseigner",
                      "Type utilisateur","Quantité vendue","Consommation d'eau (en litre)",
-                     "Diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Photo hygiène_URL",
-                     "Nombre de personnes rencontré","Difficultés rencontrés",
+                     "Diagnostic maintenance","Autre diagnostic maintenance","Photo maintenance_URL","Diagnostic hygiène","Autre diagnostic hygiène","Photo hygiène_URL",
+                     "Nombre de personnes rencontré","Difficultés rencontrés","Autre(s) difficulté(s)",
                      "Recommandations"]
     # Filtrer les données selon la plage sélectionnée
     if info != "Tous" and zone != "Tous":
